@@ -20,7 +20,8 @@ data class MyColors(
     val progressItemColor: Color = Color.Black,
     // 텍스트 색상 속성
     val textPrimary: Color = TextPrimary,
-    val placeholder: Color = Placeholder
+    val placeholder: Color = Placeholder,
+    val primary :Color = primaryColorLight
 ) {
     val primaryContainer: Color get() = material.primaryContainer
     val secondary: Color get() = material.secondary

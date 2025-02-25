@@ -1,9 +1,9 @@
 package com.pawcare.dogcat.data.repository
 
 import android.content.Context
-import android.util.Log
 import com.pawcare.dogcat.data.api.AuthApi
 import com.pawcare.dogcat.data.datastore.TokenDataStore
+import com.pawcare.dogcat.domain.mapper.AuthMapper
 import com.pawcare.dogcat.domain.model.AuthResult
 import com.pawcare.dogcat.domain.model.User
 import com.pawcare.dogcat.domain.model.common.ApiResponse
@@ -20,14 +20,11 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun loginWithKakao(email: String, accessToken: String): Result<AuthResult> {
         return try {
-            val response = authApi.loginWithKakao(
-                accessToken = accessToken,
-                provider = "KAKAO"
-            )
+            val response = authApi.loginWithKakao(accessToken, email)
 
             if (response.isSuccessful) {
                 response.body()?.let {
-                    Result.success(it)
+                    Result.success(AuthMapper.toAuthResult(it))
                 } ?: Result.failure(Exception("응답 데이터가 없습니다."))
             } else {
                 Result.failure(Exception("카카오 로그인 실패: ${response.code()}"))
@@ -39,18 +36,23 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun getUserProfile(): Result<ApiResponse<User>> {
         return try {
-            val token =
-                tokenDataStore.token.first() ?: return Result.failure(Exception("토큰을 찾을 수 없습니다."))
-            Log.d("getUserProfileToken", token)
-
+            val token = tokenDataStore.token.first() ?: return Result.failure(Exception("토큰 없음"))
             val response = authApi.getUserProfile("Bearer $token")
             if (response.isSuccessful) {
-                Result.success(response.body()!!)
+                response.body()?.let {
+                    val user = AuthMapper.toUser(it)
+                    Result.success(ApiResponse(
+                        success = it.success,
+                        message = it.message,
+                        data = user
+                    ))
+                } ?: Result.failure(Exception("응답 데이터 없음"))
             } else {
-                Result.failure(Exception("사용자 정보를 가져오는데 실패했습니다."))
+                Result.failure(Exception("프로필 조회 실패: ${response.code()}"))
             }
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
+
 }

@@ -6,6 +6,7 @@ object Paddings {
     val medium = 8.dp
     val large = 16.dp
     val extraLarge = 24.dp
+    val huge = 50.dp
 
     // 특정 용도의 패딩
     object Screen {

@@ -6,7 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
 import com.pawcare.dogcat.data.datastore.TokenDataStore
-import com.pawcare.dogcat.domain.repository.AuthRepository
+import com.pawcare.dogcat.domain.usecase.GetUserProfileUseCase
+import com.pawcare.dogcat.domain.usecase.LoginWithKakaoUseCase
 import com.pawcare.dogcat.presentation.auth.state.LoginState
 import com.pawcare.dogcat.presentation.auth.state.UserState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +20,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authRepository: AuthRepository,
+    private val loginWithKakaoUseCase: LoginWithKakaoUseCase,
+    private val getUserProfileUseCase: GetUserProfileUseCase,
     private val tokenDataStore: TokenDataStore
 ) : ViewModel() {
 
@@ -30,6 +32,10 @@ class AuthViewModel @Inject constructor(
     val userState: StateFlow<UserState> = _userState.asStateFlow()
 
     init {
+        checkTokenAndFetchProfile()
+    }
+
+    private fun checkTokenAndFetchProfile() {
         viewModelScope.launch {
             tokenDataStore.token.collect { token ->
                 if (token != null && userState.value !is UserState.Success) {
@@ -42,45 +48,32 @@ class AuthViewModel @Inject constructor(
     fun handleKakaoLogin(context: Context) {
         viewModelScope.launch {
             _loginState.value = LoginState.Loading
-            try {
-                if (UserApiClient.instance.isKakaoTalkLoginAvailable(context)) {
-                    UserApiClient.instance.loginWithKakaoTalk(context) { token, error ->
-                        handleKakaoLoginCallback(token, error)
-                    }
+            UserApiClient.instance.run {
+                if (isKakaoTalkLoginAvailable(context)) {
+                    loginWithKakaoTalk(context, callback = ::handleKakaoCallback)
                 } else {
-                    UserApiClient.instance.loginWithKakaoAccount(context) { token, error ->
-                        handleKakaoLoginCallback(token, error)
-                    }
+                    loginWithKakaoAccount(context, callback = ::handleKakaoCallback)
                 }
-            } catch (e: Exception) {
-                _loginState.value = LoginState.Error("카카오 로그인 실패: ${e.message}")
             }
         }
     }
 
-    private fun handleKakaoLoginCallback(token: OAuthToken?, error: Throwable?) {
+    private fun handleKakaoCallback(token: OAuthToken?, error: Throwable?) {
         if (error != null) {
             _loginState.value = LoginState.Error("카카오 로그인 실패: ${error.message}")
             return
         }
-
-
-        if (token != null) {
+        viewModelScope.launch {
             UserApiClient.instance.me { user, error ->
-                if (error != null) {
+                val email = user?.kakaoAccount?.email
+
+                if (error != null || email == null || token == null) {
                     _loginState.value = LoginState.Error("사용자 정보 조회 실패")
                     return@me
                 }
-
-                val email = user?.kakaoAccount?.email
-                if (email == null) {
-                    _loginState.value = LoginState.Error("이메일 정보를 찾을 수 없습니다")
-                    return@me
-                }
-
                 viewModelScope.launch {
                     try {
-                        authRepository.loginWithKakao(email, token.accessToken)
+                        loginWithKakaoUseCase(email, token.accessToken)
                             .onSuccess { result ->
                                 tokenDataStore.saveToken(result.accessToken)
                                 _loginState.value = LoginState.Success(result)
@@ -101,12 +94,13 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 _userState.value = UserState.Loading
-                authRepository.getUserProfile()
+                getUserProfileUseCase()
                     .onSuccess { response ->
                         _userState.value = UserState.Success(response.data)
                     }
                     .onFailure { exception ->
-                        _userState.value = UserState.Error(exception.message ?: "사용자 정보를 가져오는데 실패했습니다.")
+                        _userState.value =
+                            UserState.Error(exception.message ?: "사용자 정보를 가져오는데 실패했습니다.")
                     }
             } catch (e: Exception) {
                 _userState.value = UserState.Error("예상치 못한 오류가 발생했습니다.")

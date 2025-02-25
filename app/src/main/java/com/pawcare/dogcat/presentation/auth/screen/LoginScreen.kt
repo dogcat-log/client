@@ -67,13 +67,17 @@ fun LoginScreen(
         Image(
             painter = painterResource(id = R.drawable.boy_8233868_640),
             contentDescription = "App logo",
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .height(400.dp)
 //                .padding(vertical = Sizes.Image.small)
 //                .size(280.dp)
         )
         Button(
-            onClick = { viewModel.handleKakaoLogin(context) },  // 여기를 수정
+//            onClick = { viewModel.handleKakaoLogin(context) },
+            onClick = {
+                onLoginSuccess()
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(Paddings.medium)
@@ -90,7 +94,7 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.boy_8233868_640),
+                    painter = painterResource(id = R.drawable.ic_kakao),
                     contentDescription = "Kakao icon",
                     modifier = Modifier.size(Sizes.Icon.small)
                 )
@@ -100,6 +104,8 @@ fun LoginScreen(
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
+
+
         }
 
         // 구글 로그인 버튼
@@ -132,7 +138,6 @@ fun LoginScreen(
 //                )
 //            }
 //        }
-
 
 
         Log.d("loginState", loginState.toString())

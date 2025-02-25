@@ -19,6 +19,7 @@ val Green400 = Color(0xFF388E3C)
 val TextPrimary = Color(0xFF000000)
 val Placeholder = Color(0xFF999999)
 
+
 sealed class ColorSet {
     open lateinit var LightColors: MyColors
     open lateinit var DarkColors: MyColors

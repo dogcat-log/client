@@ -87,6 +87,9 @@ dependencies {
 
     // Kakao
     implementation(libs.kakao.user)
+
+    // Coil
+    implementation(libs.coil.compose)
 }
 
 kapt {

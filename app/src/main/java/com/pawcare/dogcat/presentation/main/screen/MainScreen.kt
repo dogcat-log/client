@@ -18,14 +18,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -34,14 +31,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -55,19 +49,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
-import coil.size.Size
 import com.pawcare.dogcat.domain.model.Pet
-import com.pawcare.dogcat.presentation.main.navigation.MainNavItem
 import com.pawcare.dogcat.presentation.pet.viewmodel.PetViewModel
-import com.pawcare.dogcat.ui.theme.LocalColors
+import com.pawcare.dogcat.ui.theme.AppTheme
 import kotlinx.coroutines.launch
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -150,7 +138,7 @@ fun MainScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(Paddings.huge)
-                        .background(LocalColors.current.primary),
+                        .background(AppTheme.colors.primary),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -188,7 +176,7 @@ fun MainScreen(
                                         modifier = Modifier
                                             .size(Sizes.Image.small)
                                             .background(
-                                                LocalColors.current.placeholder,
+                                                AppTheme.colors.primary,
                                                 CircleShape
                                             )
                                     )
@@ -268,66 +256,10 @@ fun MainScreen(
         ) { paddingValues ->
             // 3-3. 메인 콘텐츠 영역
             Box(modifier = Modifier.padding(paddingValues)) {
-                MainNavGraph(navController = navController)
+                MainNavHost(navController = navController)
             }
         }
     }
 }
 
-@Composable
-private fun MainBottomNavigation(
-    navController: NavHostController,
-    modifier: Modifier = Modifier
-) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
 
-    NavigationBar(
-        modifier = modifier
-    ) {
-        MainNavItem.items.forEach { item ->
-            NavigationBarItem(
-                icon = { Icon(item.icon, contentDescription = item.title) },
-                label = {
-                    Text(
-                        item.title,
-                        style = MaterialTheme.typography.titleSmall
-                    )
-                },
-                selected = currentRoute == item.route,
-                onClick = {
-                    if (currentRoute != item.route) {
-                        navController.navigate(item.route) {
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
-                }
-            )
-        }
-    }
-}
-
-@Composable
-private fun MainNavGraph(
-    navController: NavHostController,
-    modifier: Modifier = Modifier
-) {
-    NavHost(
-        navController = navController,
-        startDestination = MainNavItem.Home.route,
-        modifier = modifier
-    ) {
-        composable(MainNavItem.Home.route) {
-//            HomeScreen()
-            Text("Home Screen")
-
-        }
-        composable(MainNavItem.MyPage.route) {
-            MyPageScreen()
-        }
-        composable(MainNavItem.Settings.route) {
-            Text("Settings Screen")
-        }
-    }
-}

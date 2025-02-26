@@ -43,7 +43,6 @@ fun SplashScreen(
         if (!hasToken) {
             onNavigateToLogin()
         }
-
     }
 
     // userState 변화 감지하여 네비게이션

@@ -52,6 +52,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.pawcare.dogcat.domain.model.Pet
+import com.pawcare.dogcat.presentation.main.components.PetDrawerContent
+import com.pawcare.dogcat.presentation.main.components.PetSettingDialog
+import com.pawcare.dogcat.presentation.main.navigation.MainBottomNavigation
+import com.pawcare.dogcat.presentation.main.navigation.MainNavHost
 import com.pawcare.dogcat.presentation.pet.viewmodel.PetViewModel
 import com.pawcare.dogcat.ui.theme.AppTheme
 import kotlinx.coroutines.launch
@@ -71,164 +75,18 @@ fun MainScreen(
     val pets by viewModel.pets.collectAsState()
 
     var selectedPet by remember { mutableStateOf<Pet?>(null) }
-    // 설정 모달
-    if (showSettingsModel) {
-        BasicAlertDialog(
-            onDismissRequest = { showSettingsModel = false },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        color = MaterialTheme.colorScheme.surface,
-                        shape = MaterialTheme.shapes.medium
-                    )
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = selectedPet?.name ?: "",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
-
-                HorizontalDivider(
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    color = MaterialTheme.colorScheme.outlineVariant
-                )
-
-                TextButton(
-                    onClick = { showSettingsModel = false },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                ) {
-                    Text(
-                        "수정",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
-
-                TextButton(
-                    onClick = { showSettingsModel = false },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                ) {
-                    Text(
-                        "삭제",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            }
-        }
-    }
-
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(Paddings.huge)
-                        .background(AppTheme.colors.primary),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "내 반려동물",
-                        style = MaterialTheme.typography.headlineMedium
-                    )
-                }
-                LazyColumn(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                ) {
-                    items(pets) { pet ->
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            onClick = {
-                                //반려동물 선택처리
-                            }
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                // 이미지와 이름을 묶는 Row
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    AsyncImage(
-                                        model = pet.imageUrl,
-                                        contentDescription = "반려동물 이미지",
-                                        modifier = Modifier
-                                            .size(Sizes.Image.small)
-                                            .background(
-                                                AppTheme.colors.primary,
-                                                CircleShape
-                                            )
-                                    )
-                                    Text(
-                                        text = pet.name,
-                                        style = MaterialTheme.typography.bodyLarge
-                                    )
-                                }
-
-                                // 설정 아이콘
-                                IconButton(
-                                    onClick = {
-                                        selectedPet = pet
-                                        showSettingsModel = true
-                                    }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.MoreVert,
-                                        contentDescription = "설정"
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                NavigationDrawerItem(
-                    label = {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center,
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Settings,
-                                contentDescription = "반려동물 설정",
-                                modifier = Modifier.padding(end = Paddings.small)
-                            )
-                            Text(
-                                "추가하기",
-                                textAlign = TextAlign.Center
-                            )
-
-                        }
-                    },
-                    selected = false,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-            }
+            PetDrawerContent(
+                pets = pets,
+                onPetSettingsClick = { pet ->
+                    selectedPet = pet
+                    showSettingsModel = true
+                },
+                onAddPetClick = { scope.launch { drawerState.close() } }
+            )
         }
     ) {
         Scaffold(
@@ -251,15 +109,22 @@ fun MainScreen(
                     windowInsets = WindowInsets(0, 0, 0, 0)
                 )
             },
-            // 3-2. 하단 네비게이션 바
+            // 네비바
             bottomBar = { MainBottomNavigation(navController = navController) }
         ) { paddingValues ->
-            // 3-3. 메인 콘텐츠 영역
             Box(modifier = Modifier.padding(paddingValues)) {
                 MainNavHost(navController = navController)
             }
         }
     }
+
+    PetSettingDialog(
+        selectedPet = selectedPet,
+        showDialog = showSettingsModel,
+        onDismiss = { showSettingsModel = false }
+    )
+
+
 }
 
 

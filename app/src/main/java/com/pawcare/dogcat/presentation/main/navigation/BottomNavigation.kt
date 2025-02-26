@@ -15,7 +15,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.pawcare.dogcat.ui.theme.AppTheme
 
 @Composable
-private fun MainBottomNavigation(
+fun MainBottomNavigation(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {

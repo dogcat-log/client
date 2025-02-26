@@ -9,7 +9,7 @@ import androidx.navigation.compose.composable
 import com.pawcare.dogcat.presentation.main.screen.MyPageScreen
 
 @Composable
-private fun MainNavHost(
+fun MainNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {

@@ -25,9 +25,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.pawcare.dogcat.presentation.auth.state.LoginState
 import com.pawcare.dogcat.presentation.auth.viewmodel.AuthViewModel
 import com.pawcare.dogcat.R
 import com.pawcare.dogcat.presentation.auth.state.UserState
@@ -178,6 +175,7 @@ fun LoginScreen(
                     color = AppTheme.colors.error
                 )
             }
+
             else -> Unit
         }
         Spacer(modifier = Modifier.height(Paddings.Space.medium))

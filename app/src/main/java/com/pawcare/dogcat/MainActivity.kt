@@ -1,7 +1,6 @@
 package com.pawcare.dogcat
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -14,19 +13,20 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
-import android.content.pm.PackageManager
-import android.util.Base64
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.pawcare.dogcat.presentation.auth.screen.LoginScreen
 import com.pawcare.dogcat.presentation.auth.state.UserState
 import com.pawcare.dogcat.presentation.auth.viewmodel.AuthViewModel
 import com.pawcare.dogcat.presentation.main.screen.MainScreen
+import com.pawcare.dogcat.presentation.permission.screen.PermissionScreen
+import com.pawcare.dogcat.presentation.permission.viewmodel.PermissionViewModel
 import com.pawcare.dogcat.presentation.splash.SplashScreen
 import com.pawcare.dogcat.ui.theme.DogCatLogTheme
-import java.security.MessageDigest
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -64,12 +64,11 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun AppNavigation(
-    authViewModel: AuthViewModel,
-    modifier: Modifier = Modifier
-) {
+fun AppNavigation(authViewModel: AuthViewModel, modifier: Modifier = Modifier) {
     val navController = rememberNavController()
     val userState by authViewModel.userState.collectAsState()
+    val permissionViewModel: PermissionViewModel = hiltViewModel()
+    val allPermissionsGranted by rememberUpdatedState(permissionViewModel.areAllPermissionsGranted())
 
     NavHost(
         navController = navController,
@@ -78,18 +77,27 @@ fun AppNavigation(
     ) {
         composable("splash") {
             SplashScreen()
-
-            LaunchedEffect(userState) {
+            LaunchedEffect(userState, allPermissionsGranted) {
                 when (userState) {
                     is UserState.Success -> {
-                        navController.navigate("main") {
-                            popUpTo("splash") { inclusive = true }
+                        if (allPermissionsGranted) {
+                            navController.navigate("main") {
+                                popUpTo("splash") {
+                                    inclusive = true
+                                }
+                            }
+                        } else {
+                            navController.navigate("permission") {
+                                popUpTo("splash") {
+                                    inclusive = true
+                                }
+                            }
                         }
                     }
 
-                    is UserState.Error -> {
-                        navController.navigate("login") {
-                            popUpTo("splash") { inclusive = true }
+                    is UserState.Error -> navController.navigate("login") {
+                        popUpTo("splash") {
+                            inclusive = true
                         }
                     }
 
@@ -97,18 +105,29 @@ fun AppNavigation(
                 }
             }
         }
-
+        composable("permission") {
+            PermissionScreen(
+                onPermissionGranted = {
+                    navController.navigate("main") { popUpTo("permission") { inclusive = true } }
+                }
+            )
+        }
         composable("login") {
             LoginScreen(
                 viewModel = authViewModel,
                 onLoginSuccess = {
-                    navController.navigate("main") {
-                        popUpTo("login") { inclusive = true }
+                    if (allPermissionsGranted) {
+                        navController.navigate("main") { popUpTo("login") { inclusive = true } }
+                    } else {
+                        navController.navigate("permission") {
+                            popUpTo("login") {
+                                inclusive = true
+                            }
+                        }
                     }
                 }
             )
         }
-
         composable("main") {
             MainScreen()
         }

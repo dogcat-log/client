@@ -20,26 +20,33 @@ class TokenDataStore @Inject constructor(
 
     companion object {
         private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "token")
-        private val TOKEN_KEY = stringPreferencesKey("auth_token")
+        private val ACCESS_TOKEN_KEY = stringPreferencesKey("access_token")
+        private val REFRESH_TOKEN_KEY = stringPreferencesKey("refresh_token")
     }
 
     // 토큰 저장
-    suspend fun saveToken(token: String) {
+    suspend fun saveToken(jwtAccessToken: String, jwtRefreshToken: String) {
         context.dataStore.edit { preferences ->
-            preferences[TOKEN_KEY] = token
+            preferences[ACCESS_TOKEN_KEY] = jwtAccessToken
+            preferences[REFRESH_TOKEN_KEY] = jwtRefreshToken
         }
     }
 
-    // 토큰 가져오기
-    val token: Flow<String?> = context.dataStore.data.map { preferences ->
-        preferences[TOKEN_KEY]
+    // 액세스 토큰 가져오기
+    val accessToken: Flow<String?> = context.dataStore.data.map { preferences ->
+        preferences[ACCESS_TOKEN_KEY]
+    }
+
+    // 리프레시 토큰 가져오기
+    val refreshToken: Flow<String?> = context.dataStore.data.map { preferences ->
+        preferences[REFRESH_TOKEN_KEY]
     }
 
     // 토큰 삭제(로그아웃 시 사용)
     suspend fun clearToken() {
         context.dataStore.edit { preferences ->
-            preferences.remove(TOKEN_KEY)
+            preferences.remove(ACCESS_TOKEN_KEY)
+            preferences.remove(REFRESH_TOKEN_KEY)
         }
     }
-
 }

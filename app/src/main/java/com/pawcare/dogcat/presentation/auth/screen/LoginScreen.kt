@@ -2,6 +2,9 @@ package com.pawcare.dogcat.presentation.auth.screen
 
 import Paddings
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -22,10 +25,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.pawcare.dogcat.presentation.auth.state.LoginState
 import com.pawcare.dogcat.presentation.auth.viewmodel.AuthViewModel
 import com.pawcare.dogcat.R
+import com.pawcare.dogcat.presentation.auth.state.UserState
 import com.pawcare.dogcat.ui.theme.AppShapes
+import com.pawcare.dogcat.ui.theme.AppTheme
 
 @Composable
 fun LoginScreen(
@@ -33,12 +40,18 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val loginState by viewModel.loginState.collectAsState()
     val userState by viewModel.userState.collectAsState()
     val context = LocalContext.current
 
-    LaunchedEffect(loginState) {
-        if (loginState is LoginState.Success) {
+    // 구글 로그인 결과 처리
+    val googleLoginLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        viewModel.processGoogleSignInResult(result.data)
+    }
+
+    LaunchedEffect(userState) {
+        if (userState is UserState.Success) {
             onLoginSuccess()
         }
     }
@@ -70,9 +83,10 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(400.dp)
-//                .padding(vertical = Sizes.Image.small)
-//                .size(280.dp)
+                .padding(vertical = Sizes.Image.small)
+                .size(280.dp)
         )
+        // 카카오 로그인
         Button(
 //            onClick = { viewModel.handleKakaoLogin(context) },
             onClick = {
@@ -109,48 +123,61 @@ fun LoginScreen(
         }
 
         // 구글 로그인 버튼
-//        Button(
-//            onClick = { viewModel.handleSocialLogin("GOOGLE") },
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(Paddings.medium)
-//                .height(Sizes.Button.medium),
-//            border = BorderStroke(0.5.dp, LocalColors.current.placeholder),
-//            colors = ButtonDefaults.outlinedButtonColors(
-//                contentColor = Color.Black
-//            ),
-//            shape = AppShapes.medium
-//        ) {
-//            Row(
-//                horizontalArrangement = Arrangement.Center,
-//                verticalAlignment = Alignment.CenterVertically,
-//                modifier = Modifier.fillMaxWidth()
-//            ) {
-//                Image(
-//                    painter = painterResource(id = R.drawable.ic_google),
-//                    contentDescription = "Google icon",
-//                    modifier = Modifier.size(Sizes.Image.tiny)
-//                )
-//                Spacer(modifier = Modifier.width(Paddings.Space.medium))
-//                Text(
-//                    text = "구글로 시작하기",
-//                    style = MaterialTheme.typography.bodyMedium
-//                )
-//            }
-//        }
-
-
-        Log.d("loginState", loginState.toString())
-        // 로그인 상태 표시
-        when (loginState) {
-            is LoginState.Loading -> CircularProgressIndicator()
-            is LoginState.Error -> {
+        Button(
+            onClick = {
+                val intent = viewModel.handleGoogleLogin(context)
+                googleLoginLauncher.launch(intent)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Paddings.medium)
+                .height(Sizes.Button.medium),
+            border = BorderStroke(0.5.dp, AppTheme.colors.primary),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = Color.Black
+            ),
+            shape = AppShapes.medium
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_google),
+                    contentDescription = "Google icon",
+                    modifier = Modifier.size(Sizes.Image.tiny)
+                )
+                Spacer(modifier = Modifier.width(Paddings.Space.medium))
                 Text(
-                    text = (loginState as LoginState.Error).message,
-                    color = Color.Red
+                    text = "구글로 시작하기",
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
+        }
 
+        Button(
+            onClick = { viewModel.handleNaverLogin(context) }
+
+        ) {
+            Row {
+                Text(
+                    text = "네이버 로그인",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+
+
+        // 상태
+        when (userState) {
+            is UserState.Loading -> CircularProgressIndicator()
+            is UserState.Error -> {
+                Text(
+                    text = (userState as UserState.Error).message,
+                    color = AppTheme.colors.error
+                )
+            }
             else -> Unit
         }
         Spacer(modifier = Modifier.height(Paddings.Space.medium))

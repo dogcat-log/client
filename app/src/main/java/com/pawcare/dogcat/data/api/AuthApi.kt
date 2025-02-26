@@ -16,7 +16,7 @@ interface AuthApi {
     ): Response<ApiResponse<User>>
 
     @POST("/api/v1/auth/login/oauth2")
-    suspend fun loginWithKakao(
+    suspend fun socialLogin(
         @Query("accessToken") accessToken: String,
         @Query("provider") provider: String
     ): Response<AuthResult>

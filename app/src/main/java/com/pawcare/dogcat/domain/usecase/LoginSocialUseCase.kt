@@ -5,10 +5,10 @@ import com.pawcare.dogcat.domain.repository.AuthRepository
 import javax.inject.Inject
 
 
-class LoginWithKakaoUseCase @Inject constructor(
+class LoginSocialUseCase @Inject constructor(
     private val authRepository: AuthRepository
 ) {
-    suspend operator fun invoke(email: String, accessToken: String) : Result<AuthResult>{
-        return authRepository.loginWithKakao(email, accessToken)
+    suspend operator fun invoke(provider: String, accessToken: String) : Result<AuthResult>{
+        return authRepository.socialLogin(provider, accessToken)
     }
 }

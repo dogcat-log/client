@@ -18,9 +18,9 @@ class AuthRepositoryImpl @Inject constructor(
     private val authApi: AuthApi
 ) : AuthRepository {
 
-    override suspend fun loginWithKakao(email: String, accessToken: String): Result<AuthResult> {
+    override suspend fun socialLogin(provider: String, accessToken: String): Result<AuthResult> {
         return try {
-            val response = authApi.loginWithKakao(accessToken, email)
+            val response = authApi.socialLogin(accessToken, provider)
 
             if (response.isSuccessful) {
                 response.body()?.let {
@@ -36,16 +36,13 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun getUserProfile(): Result<ApiResponse<User>> {
         return try {
-            val token = tokenDataStore.token.first() ?: return Result.failure(Exception("토큰 없음"))
+            val token =
+                tokenDataStore.accessToken.first() ?: return Result.failure(Exception("토큰이 없습니다"))
+
             val response = authApi.getUserProfile("Bearer $token")
             if (response.isSuccessful) {
                 response.body()?.let {
-                    val user = AuthMapper.toUser(it)
-                    Result.success(ApiResponse(
-                        success = it.success,
-                        message = it.message,
-                        data = user
-                    ))
+                    Result.success(it)
                 } ?: Result.failure(Exception("응답 데이터 없음"))
             } else {
                 Result.failure(Exception("프로필 조회 실패: ${response.code()}"))

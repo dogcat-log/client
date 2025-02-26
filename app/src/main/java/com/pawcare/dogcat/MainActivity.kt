@@ -16,7 +16,12 @@ import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import android.content.pm.PackageManager
 import android.util.Base64
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import com.pawcare.dogcat.presentation.auth.screen.LoginScreen
+import com.pawcare.dogcat.presentation.auth.state.UserState
 import com.pawcare.dogcat.presentation.auth.viewmodel.AuthViewModel
 import com.pawcare.dogcat.presentation.main.screen.MainScreen
 import com.pawcare.dogcat.presentation.splash.SplashScreen
@@ -47,46 +52,65 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             DogCatLogTheme {
-                val navController = rememberNavController()
-
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    NavHost(
-                        navController = navController,
-                        startDestination = "splash",
+                    AppNavigation(
+                        authViewModel = authViewModel,
                         modifier = Modifier.padding(innerPadding)
-                    ) {
-                        composable("splash") {
-                            SplashScreen(
-                                onNavigateToMain = {
-                                    navController.navigate("main") {
-                                        popUpTo("splash") { inclusive = true }
-                                    }
-                                },
-                                onNavigateToLogin = {
-                                    navController.navigate("login") {
-                                        popUpTo("splash") { inclusive = true }
-                                    }
-                                }
-                            )
-                        }
-
-                        composable("login") {
-                            LoginScreen(
-                                viewModel = authViewModel,
-                                onLoginSuccess = {
-                                    navController.navigate("main") {
-                                        popUpTo("login") { inclusive = true }
-                                    }
-                                }
-                            )
-                        }
-
-                        composable("main") {
-                            MainScreen()
-                        }
-                    }
+                    )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun AppNavigation(
+    authViewModel: AuthViewModel,
+    modifier: Modifier = Modifier
+) {
+    val navController = rememberNavController()
+    val userState by authViewModel.userState.collectAsState()
+
+    NavHost(
+        navController = navController,
+        startDestination = "splash",
+        modifier = modifier
+    ) {
+        composable("splash") {
+            SplashScreen()
+
+            LaunchedEffect(userState) {
+                when (userState) {
+                    is UserState.Success -> {
+                        navController.navigate("main") {
+                            popUpTo("splash") { inclusive = true }
+                        }
+                    }
+
+                    is UserState.Error -> {
+                        navController.navigate("login") {
+                            popUpTo("splash") { inclusive = true }
+                        }
+                    }
+
+                    else -> {}
+                }
+            }
+        }
+
+        composable("login") {
+            LoginScreen(
+                viewModel = authViewModel,
+                onLoginSuccess = {
+                    navController.navigate("main") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable("main") {
+            MainScreen()
         }
     }
 }

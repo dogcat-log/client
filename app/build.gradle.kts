@@ -88,6 +88,10 @@ dependencies {
     // Kakao
     implementation(libs.kakao.user)
 
+    // naver
+    implementation(libs.naver.login)
+    // google
+    implementation(libs.google.sigin)
     // Coil
     implementation(libs.coil.compose)
 }

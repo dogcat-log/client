@@ -10,7 +10,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.pawcare.dogcat.presentation.auth.screen.components.UserProfileContent
+import com.pawcare.dogcat.presentation.main.components.UserProfileContent
 import com.pawcare.dogcat.presentation.auth.viewmodel.AuthViewModel
 
 @Composable

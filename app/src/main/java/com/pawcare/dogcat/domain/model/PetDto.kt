@@ -1,7 +1,7 @@
 package com.pawcare.dogcat.domain.model
 
 
-data class Pet(
+data class PetDto(
     val id: String,
     val name: String,
     val type: String, // DOG or CAT

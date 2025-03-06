@@ -15,12 +15,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.pawcare.dogcat.domain.model.Pet
+import com.pawcare.dogcat.domain.model.PetDto
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PetSettingDialog(
-    selectedPet: Pet?,
+    selectedPet: PetDto?,
     showDialog: Boolean,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier

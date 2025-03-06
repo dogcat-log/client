@@ -1,7 +1,7 @@
 package com.pawcare.dogcat.data.api
 
-import com.pawcare.dogcat.domain.model.AuthResult
-import com.pawcare.dogcat.domain.model.User
+import com.pawcare.dogcat.domain.model.AuthResultDto
+import com.pawcare.dogcat.data.model.User
 import com.pawcare.dogcat.domain.model.common.ApiResponse
 import retrofit2.Response
 import retrofit2.http.GET
@@ -15,9 +15,9 @@ interface AuthApi {
         @Header("Authorization") token: String
     ): Response<ApiResponse<User>>
 
-    @POST("/api/v1/auth/login/oauth2")
+    @POST("/api/auth/login/oauth2")
     suspend fun socialLogin(
         @Query("accessToken") accessToken: String,
         @Query("provider") provider: String
-    ): Response<AuthResult>
+    ): Response<ApiResponse<AuthResultDto>>
 }

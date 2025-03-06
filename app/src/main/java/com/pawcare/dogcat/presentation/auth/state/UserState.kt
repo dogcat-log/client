@@ -1,6 +1,6 @@
 package com.pawcare.dogcat.presentation.auth.state
 
-import com.pawcare.dogcat.domain.model.User
+import com.pawcare.dogcat.data.model.User
 
 
 sealed class UserState {

@@ -15,13 +15,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.pawcare.dogcat.domain.model.Pet
+import com.pawcare.dogcat.domain.model.PetDto
 import com.pawcare.dogcat.ui.theme.AppTheme
 
 @Composable
 fun PetDrawerContent(
-    pets: List<Pet>,
-    onPetSettingsClick: (Pet) -> Unit,
+    pets: List<PetDto>,
+    onPetSettingsClick: (PetDto) -> Unit,
     onAddPetClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {

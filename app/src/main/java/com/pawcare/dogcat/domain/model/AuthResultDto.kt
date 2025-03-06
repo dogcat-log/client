@@ -1,6 +1,6 @@
 package com.pawcare.dogcat.domain.model
 
-data class AuthResult(
+data class AuthResultDto(
     val accessToken: String,
     val refreshToken: String,
 )

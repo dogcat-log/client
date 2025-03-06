@@ -1,4 +1,4 @@
-package com.pawcare.dogcat.domain.model
+package com.pawcare.dogcat.data.model
 
 import com.google.gson.annotations.SerializedName
 

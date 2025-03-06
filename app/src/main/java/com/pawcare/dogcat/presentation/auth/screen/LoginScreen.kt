@@ -85,10 +85,10 @@ fun LoginScreen(
         )
         // 카카오 로그인
         Button(
-//            onClick = { viewModel.handleKakaoLogin(context) },
-            onClick = {
-                onLoginSuccess()
-            },
+            onClick = { viewModel.handleKakaoLogin(context) },
+//            onClick = {
+//                onLoginSuccess()
+//            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(Paddings.medium)

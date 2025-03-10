@@ -10,6 +10,7 @@ import retrofit2.http.POST
 import retrofit2.http.Query
 
 interface AuthApi {
+
     @GET("/api/user/profile")
     suspend fun getUserProfile(
         @Header("Authorization") token: String

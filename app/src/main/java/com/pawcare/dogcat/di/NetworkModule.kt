@@ -2,6 +2,7 @@ package com.pawcare.dogcat.di
 
 import com.pawcare.dogcat.core.ApiConstants
 import com.pawcare.dogcat.data.api.AuthApi
+import com.pawcare.dogcat.data.api.AuthInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,12 +20,13 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun providerOkHttpClient(): OkHttpClient {
+    fun providerOkHttpClient(authInterceptor: AuthInterceptor): OkHttpClient {
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
         return OkHttpClient.Builder()
             .addInterceptor(logging)
+            .addInterceptor(authInterceptor)
             .build()
     }
 
@@ -40,7 +42,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideAuthApi(retrofit: Retrofit) : AuthApi {
+    fun provideAuthApi(retrofit: Retrofit): AuthApi {
         return retrofit.create(AuthApi::class.java)
     }
 

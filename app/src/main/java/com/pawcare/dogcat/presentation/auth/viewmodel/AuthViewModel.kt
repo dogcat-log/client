@@ -14,6 +14,7 @@ import com.navercorp.nid.NaverIdLoginSDK
 import com.navercorp.nid.oauth.OAuthLoginCallback
 import com.pawcare.dogcat.R
 import com.pawcare.dogcat.data.datastore.TokenDataStore
+import com.pawcare.dogcat.domain.repository.AuthRepository
 import com.pawcare.dogcat.domain.usecase.GetUserProfileUseCase
 import com.pawcare.dogcat.domain.usecase.LoginSocialUseCase
 import com.pawcare.dogcat.presentation.auth.state.UserState
@@ -29,7 +30,8 @@ import javax.inject.Inject
 class AuthViewModel @Inject constructor(
     private val loginSocialUseCase: LoginSocialUseCase,
     private val getUserProfileUseCase: GetUserProfileUseCase,
-    private val tokenDataStore: TokenDataStore
+    private val tokenDataStore: TokenDataStore,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _userState = MutableStateFlow<UserState>(UserState.Initial)
@@ -136,7 +138,8 @@ class AuthViewModel @Inject constructor(
                                 _userState.value = UserState.Success(response.data)
                             }
                             .onFailure { exception ->
-                                _userState.value = UserState.Error("사용자 정보를 가져오는데 실패했습니다: ${exception.message}")
+                                _userState.value =
+                                    UserState.Error("사용자 정보를 가져오는데 실패했습니다: ${exception.message}")
                             }
                     }
                     .onFailure { e ->

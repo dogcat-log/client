@@ -37,31 +37,31 @@ fun UserProfileContent(
                         modifier = Modifier.padding(Paddings.large)
                     )
 
-                    ProfileItem(
-                        label = "이름",
-                        value = user.userName ?: "이름 없음"
-                    )
+//                    ProfileItem(
+//                        label = "이름",
+//                        value = user.userName ?: "이름 없음"
+//                    )
                     ProfileItem(
                         label = "이메일",
-                        value = user.email ?: "이메일 없음"
+                        value = user.userEmail ?: "이메일 없음"
                     )
-                    ProfileItem(
-                        label = "전화번호",
-                        value = user.phoneNumber ?: "전화번호 미등록"
-                    )
-                    ProfileItem(
-                        label = "프로필 이미지",
-                        value = user.profileImageUrl ?: "프로필 이미지 없음"
-                    )
-
-                    if (user.familyActive) {
-                        user.familyName?.let { familyName ->
-                            ProfileItem(
-                                label = "패밀리 이름",
-                                value = familyName
-                            )
-                        }
-                    }
+//                    ProfileItem(
+//                        label = "전화번호",
+//                        value = user.phoneNumber ?: "전화번호 미등록"
+//                    )
+//                    ProfileItem(
+//                        label = "프로필 이미지",
+//                        value = user.profileImageUrl ?: "프로필 이미지 없음"
+//                    )
+//
+//                    if (user.familyActive) {
+//                        user.familyName?.let { familyName ->
+//                            ProfileItem(
+//                                label = "패밀리 이름",
+//                                value = familyName
+//                            )
+//                        }
+//                    }
                 }
             }
 
